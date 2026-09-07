@@ -38,7 +38,7 @@ export class UsersService {
     return users.map((user) => this.toPublicUser(user));
   }
 
-  async findOne(id: number) {
+  async findById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id }
     });
@@ -50,8 +50,20 @@ export class UsersService {
     return this.toPublicUser(user);
   }
 
+  async findByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    return this.toPublicUser(user);
+  }
+
   async update(id: number, dto: UpdateUserDto) {
-    await this.findOne(id);
+    await this.findById(id);
 
     const data: {
       email?: string;
@@ -88,7 +100,7 @@ export class UsersService {
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    await this.findById(id);
 
     await this.prisma.user.delete({
       where: { id }
